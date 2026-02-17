@@ -1,24 +1,23 @@
 import time
 import joblib
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
+from fastapi.middleware.cors import CORSMiddleware # <--- NEW
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, desc
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from datetime import datetime
 
-# 1. LOAD THE TRAINED MODEL
-# We load the "brain" once when the server starts
+# 1. LOAD MODEL
 model = joblib.load("isolation_forest.pkl")
 
-# 2. DATABASE CONFIGURATION
+# 2. DATABASE SETUP
 DATABASE_URL = "postgresql://user:password@localhost:5432/ecostream"
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
-# 3. DEFINE THE TABLE
 class SensorReading(Base):
     __tablename__ = "sensor_readings"
     id = Column(Integer, primary_key=True, index=True)
@@ -27,11 +26,28 @@ class SensorReading(Base):
     temperature = Column(Float)
     pressure = Column(Float)
     vibration = Column(Float)
-    status = Column(String) # We will determine this using ML
+    status = Column(String)
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+# 3. ENABLE CORS (Allow React to talk to FastAPI)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, specify the exact domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 class SensorData(BaseModel):
     machine_id: str
@@ -39,47 +55,37 @@ class SensorData(BaseModel):
     temperature: float
     pressure: float
     vibration: float
-    status: str  # We receive this, but we might overwrite it!
+    status: str
 
+# 4. INGEST ENDPOINT (POST)
 @app.post("/ingest")
-async def ingest_data(data: SensorData):
-    db = SessionLocal()
+async def ingest_data(data: SensorData, db: Session = Depends(get_db)):
     try:
-        # --- THE AI BRAIN KICKS IN HERE ---
-        # 1. Format the data exactly how the model expects it
         features = pd.DataFrame(
             [[data.temperature, data.pressure, data.vibration]], 
             columns=["temperature", "pressure", "vibration"]
         )
-        
-        # 2. Ask the model: Is this an anomaly?
-        prediction = model.predict(features)[0] # Returns 1 (Normal) or -1 (Anomaly)
-        
-        # 3. Set status based on AI, not just what the sensor said
-        if prediction == -1:
-            ai_status = "CRITICAL" 
-            print(f"🚨 ANOMALY DETECTED! Temp: {data.temperature}")
-        else:
-            ai_status = "NORMAL"
+        prediction = model.predict(features)[0]
+        ai_status = "CRITICAL" if prediction == -1 else "NORMAL"
 
-        # 4. Save to Database
         new_reading = SensorReading(
             machine_id=data.machine_id,
             timestamp=datetime.fromisoformat(data.timestamp),
             temperature=data.temperature,
             pressure=data.pressure,
             vibration=data.vibration,
-            status=ai_status # <-- Using the AI's judgment
+            status=ai_status
         )
-        
         db.add(new_reading)
         db.commit()
         db.refresh(new_reading)
-        
-        return {"message": "Data processed", "ai_status": ai_status}
-        
+        return {"status": ai_status}
     except Exception as e:
-        print(f"❌ Error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-    finally:
-        db.close()
+
+# 5. NEW: READ ENDPOINT (GET)
+# This lets the frontend fetch the last 20 readings to graph them.
+@app.get("/readings")
+def get_readings(limit: int = 20, db: Session = Depends(get_db)):
+    readings = db.query(SensorReading).order_by(desc(SensorReading.timestamp)).limit(limit).all()
+    return readings[::-1] # Reverse so the graph goes Left -> Right
