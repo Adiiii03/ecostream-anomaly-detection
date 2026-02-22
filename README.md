@@ -11,7 +11,6 @@ A real-time full-stack IoT dashboard that detects machine failures using ML.
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-TimescaleDB-336791.svg)
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine%20Learning-F7931E.svg)
 
-*(Drag and drop your dashboard screenshot here!)*
 
 ## 📌 Overview
 EcoStream is an end-to-end telemetry and analytics pipeline designed to monitor critical infrastructure and industrial machinery. Instead of relying on static, historical datasets, this project ingests live, streaming sensor data (temperature, pressure, vibration) and applies **Machine Learning in real-time** to detect anomalies before catastrophic failures occur.
