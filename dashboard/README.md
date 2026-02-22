@@ -1,16 +1,44 @@
-# React + Vite
+# 🏭 EcoStream: Industrial IoT Anomaly Detection Pipeline
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)
+![React](https://img.shields.io/badge/React-18.0+-61dafb.svg)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg)
+![TimescaleDB](https://img.shields.io/badge/TimescaleDB-PostgreSQL-f3bc16.svg)
 
-Currently, two official plugins are available:
+[INSERT YOUR SCREENSHOT HERE]
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 📌 Overview
+EcoStream is an end-to-end Industrial Internet of Things (IIoT) pipeline designed to ingest, process, and visualize factory sensor data in real-time. It utilizes a Machine Learning model (**Isolation Forest**) to instantly detect mechanical anomalies (like temperature spikes or abnormal vibrations) and alerts operators before catastrophic equipment failure occurs.
 
-## React Compiler
+This project demonstrates a full-stack data architecture, moving from raw data generation to AI inference, persistent storage, and frontend visualization.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🏗️ Architecture & Tech Stack
+* **Data Generation:** Python script simulating real-time machine telemetry (Temperature, Pressure, Vibration).
+* **AI / Machine Learning:** `Scikit-Learn` (Isolation Forest) trained on synthetic baseline data to detect multidimensional outliers.
+* **Backend API:** `FastAPI` serving as the ingestion layer and model inference engine.
+* **Database:** `PostgreSQL` with `TimescaleDB` running in `Docker` for high-performance time-series data storage.
+* **Frontend Dashboard:** `React` + `Vite` + `Recharts` featuring a responsive, dark-mode UI with real-time polling and visual alarms.
 
-## Expanding the ESLint configuration
+## 🚀 Quick Start (Demo Mode)
+Want to run the entire pipeline on your local machine? 
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+**Prerequisites:** Ensure you have Python 3, Node.js, and Docker Desktop installed.
+
+```bash
+# 1. Clone the repository
+git clone [https://github.com/yourusername/ecostream-anomaly-detection.git](https://github.com/yourusername/ecostream-anomaly-detection.git)
+cd ecostream-anomaly-detection
+
+# 2. Install Python Dependencies
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 3. Install Frontend Dependencies
+cd dashboard
+npm install
+cd ..
+
+# 4. Run the full stack (DB, Backend, Frontend, and Data Stream)
+./start_demo.sh
