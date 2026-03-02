@@ -12,12 +12,12 @@ A real-time full-stack IoT dashboard that detects machine failures using ML.
 ![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine%20Learning-F7931E.svg)
 
 
-## 📌 Overview
+## Overview
 EcoStream is an end-to-end telemetry and analytics pipeline designed to monitor critical infrastructure and industrial machinery. Instead of relying on static, historical datasets, this project ingests live, streaming sensor data (temperature, pressure, vibration) and applies **Machine Learning in real-time** to detect anomalies before catastrophic failures occur.
 
 This architecture bridges the gap between data science and actionable operational intelligence—a crucial requirement for modern civic, environmental, and industrial monitoring systems.
 
-## 🏗️ The Architecture
+## The Architecture
 The system is built on a microservices architecture, ensuring high performance and separation of concerns:
 
 1. **Data Ingestion Faucet:** A Python-based IoT simulator generates realistic, multi-variate time-series telemetry.
@@ -26,13 +26,13 @@ The system is built on a microservices architecture, ensuring high performance a
 4. **Persistent Memory (Docker + TimescaleDB):** Data is permanently stored in a containerized PostgreSQL database optimized for time-series analytics.
 5. **The Face (React + Recharts):** A dark-mode, responsive web dashboard provides real-time data visualization and instant visual alarms for critical system states.
 
-## ✨ Key Features
+## Key Features
 * **Real-Time ML Inference:** Deploys a serialized `.pkl` model directly into the API flow.
 * **Time-Series Optimization:** Utilizes TimescaleDB to handle high-frequency sensor writes.
 * **Live Polling Dashboard:** React frontend automatically updates every 2 seconds without page refreshes.
 * **"Demo Mode" Automation:** A custom bash script (`start_demo.sh`) spins up the entire full-stack environment (Database, API, Frontend, and Data Stream) with a single command.
 
-## 🚀 Quick Start (Run it Locally)
+## Quick Start (Run it Locally)
 
 **Prerequisites:** Ensure you have `Python 3`, `Node.js`, and `Docker Desktop` installed and running.
 
